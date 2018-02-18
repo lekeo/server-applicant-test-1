@@ -4,6 +4,7 @@ import com.mytaxi.controller.mapper.DriverMapper;
 import com.mytaxi.datatransferobject.DriverDTO;
 import com.mytaxi.domainobject.DriverDO;
 import com.mytaxi.domainvalue.OnlineStatus;
+import com.mytaxi.exception.CarAlreadyInUseException;
 import com.mytaxi.exception.ConstraintsViolationException;
 import com.mytaxi.exception.EntityNotFoundException;
 import com.mytaxi.service.driver.DriverService;
@@ -48,6 +49,14 @@ public class DriverController
     }
 
 
+    // Can be extended for other additional parameters
+    @GetMapping("/filter")
+    public DriverDTO getDriverByUsername(@Valid @RequestParam String username) throws EntityNotFoundException
+    {
+        return DriverMapper.makeDriverDTO(driverService.findByUsername(username));
+    }
+
+
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public DriverDTO createDriver(@Valid @RequestBody DriverDTO driverDTO) throws ConstraintsViolationException
@@ -78,5 +87,21 @@ public class DriverController
         throws ConstraintsViolationException, EntityNotFoundException
     {
         return DriverMapper.makeDriverDTOList(driverService.find(onlineStatus));
+    }
+
+
+    @PutMapping("/{driverId}/{carId}")
+    public void selectCar(@Valid @PathVariable long driverId, @Valid @PathVariable long carId)
+        throws ConstraintsViolationException, EntityNotFoundException, CarAlreadyInUseException
+    {
+        driverService.selectCar(driverId, carId);
+    }
+
+
+    @DeleteMapping("/{driverId}/{carId}")
+    public void deselectCar(@Valid @PathVariable long driverId, @Valid @PathVariable long carId)
+        throws ConstraintsViolationException, EntityNotFoundException
+    {
+        driverService.deselectCar(driverId, carId);
     }
 }
